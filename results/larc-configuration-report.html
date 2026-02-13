@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LARC Configuration Report — Larsen Consulting</title>
+  <style>
+    :root {
+      --primary: #0078d4;
+      --primary-dark: #005a9e;
+      --success: #107c10;
+      --bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --border: #e1e1e1;
+      --text: #323130;
+      --text-light: #605e5c;
+      --accent: #fff4ce;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 2.5rem 2rem;
+    }
+    header h1 { font-size: 1.75rem; font-weight: 600; }
+    header p { opacity: .85; margin-top: .35rem; font-size: .95rem; }
+    .meta-bar {
+      display: flex; flex-wrap: wrap; gap: 1.5rem;
+      padding: 1rem 2rem;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      font-size: .85rem;
+      color: var(--text-light);
+    }
+    .meta-bar span strong { color: var(--text); }
+    .container { max-width: 1120px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* Phase cards */
+    .phase {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: 1rem 1.25rem;
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .phase-header:hover { background: #f0f0f0; }
+    .phase-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+    .phase-title { font-weight: 600; font-size: 1.05rem; }
+    .phase-badge {
+      margin-left: auto;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .2rem .6rem;
+      border-radius: 12px;
+      background: #dff6dd;
+      color: var(--success);
+    }
+    .phase-body { padding: 1.25rem; }
+    .phase-body p { margin-bottom: .75rem; color: var(--text-light); font-size: .9rem; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+      margin-bottom: 1rem;
+    }
+    table caption {
+      text-align: left;
+      font-weight: 600;
+      font-size: .9rem;
+      padding: .5rem 0;
+      color: var(--text);
+    }
+    th {
+      text-align: left;
+      padding: .55rem .75rem;
+      background: #f3f2f1;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    td {
+      padding: .5rem .75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    .code { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: .82rem; color: var(--primary-dark); }
+
+    /* Sub-sections */
+    .subsection { margin-top: 1.25rem; }
+    .subsection h4 {
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: .5rem;
+      padding-bottom: .25rem;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    /* KV pairs */
+    .kv { display: grid; grid-template-columns: 200px 1fr; gap: .25rem .75rem; font-size: .85rem; margin-bottom: .75rem; }
+    .kv dt { font-weight: 600; color: var(--text-light); }
+    .kv dd { color: var(--text); }
+
+    /* Notes */
+    .note {
+      background: var(--accent);
+      border-left: 4px solid #d29200;
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      border-radius: 0 4px 4px 0;
+      margin-top: 1rem;
+    }
+    .note strong { color: #8a6200; }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .kv { grid-template-columns: 1fr; }
+      header { padding: 1.5rem 1rem; }
+      .container { padding: 1rem; }
+    }
+
+    /* Collapsible */
+    .phase-body { display: block; }
+    .phase.collapsed .phase-body { display: none; }
+    .phase-header::after {
+      content: '▾';
+      font-size: .75rem;
+      margin-left: .5rem;
+      transition: transform .2s;
+    }
+    .phase.collapsed .phase-header::after { transform: rotate(-90deg); }
+
+    /* Print */
+    @media print {
+      body { background: #fff; }
+      .phase { break-inside: avoid; }
+      .phase.collapsed .phase-body { display: block !important; }
+      header { background: var(--primary); print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>D365 Finance Configuration Report</h1>
+  <p>Larsen Consulting (LARC) — Full GL, AR &amp; AP Module Setup</p>
+</header>
+
+<div class="meta-bar">
+  <span><strong>Entity ID:</strong> LARC</span>
+  <span><strong>Company:</strong> Larsen Consulting</span>
+  <span><strong>Country:</strong> Denmark (DNK)</span>
+  <span><strong>Currency:</strong> DKK</span>
+  <span><strong>Environment:</strong> sca-dev-lbl-2</span>
+  <span><strong>Date:</strong> 2025</span>
+</div>
+
+<div class="container">
+
+  <!-- ─── Phase 1 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">1</span>
+      <span class="phase-title">Legal Entity &amp; Fiscal Foundations</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <dl class="kv">
+        <dt>Legal Entity ID</dt><dd class="code">LARC</dd>
+        <dt>Company Name</dt><dd>Larsen Consulting</dd>
+        <dt>Address</dt><dd>Vesterbrogade 10, 1620 Copenhagen V, Denmark</dd>
+        <dt>Country/Region</dt><dd>DNK</dd>
+        <dt>Language</dt><dd>da (Danish)</dd>
+        <dt>Timezone</dt><dd>GMT+01:00 Brussels, Copenhagen, Madrid</dd>
+        <dt>Accounting Currency</dt><dd class="code">DKK</dd>
+        <dt>Fiscal Calendar</dt><dd class="code">Fiscal</dd>
+        <dt>Fiscal Year Coverage</dt><dd>2014 – 2026 (all periods open)</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- ─── Phase 2 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">2</span>
+      <span class="phase-title">Chart of Accounts — "Danish"</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <p>Dedicated Chart of Accounts <span class="code">Danish</span> — "Danish Statutory Chart of Accounts" — with 43 main accounts.</p>
+
+      <div class="subsection">
+        <h4>Assets (100000 – 189999)</h4>
+        <table>
+          <thead><tr><th>Account</th><th>Name</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="code">100100</td><td>Cash</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">100200</td><td>Petty Cash</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">110100</td><td>Bank – DKK Current Account</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">110200</td><td>Bank – Foreign Currency</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">130100</td><td>Accounts Receivable</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">140100</td><td>Prepaid Expenses</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">150100</td><td>VAT Receivable</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">170100</td><td>Furniture &amp; Equipment</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">175100</td><td>Accumulated Depreciation</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">180100</td><td>Intangible Assets</td><td>Profit and Loss</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Liabilities &amp; Equity (200000 – 319999)</h4>
+        <table>
+          <thead><tr><th>Account</th><th>Name</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="code">200100</td><td>Accounts Payable</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">210100</td><td>Accrued Liabilities</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">211000</td><td>VAT Receivable (Tax)</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">212000</td><td>VAT Payable (Tax)</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">213000</td><td>VAT Settlement (Tax)</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">220100</td><td>Payroll Liabilities</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">250100</td><td>Long-term Debt</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">300100</td><td>Share Capital</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">310100</td><td>Retained Earnings</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">310200</td><td>Current Year Earnings</td><td>Profit and Loss</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Revenue (400000 – 429999)</h4>
+        <table>
+          <thead><tr><th>Account</th><th>Name</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="code">400100</td><td>Consulting Revenue</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">400200</td><td>Training Revenue</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">400300</td><td>License Revenue</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">410100</td><td>Other Operating Income</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">420100</td><td>Financial Income</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">420200</td><td>Foreign Exchange Gain</td><td>Profit and Loss</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Expenses (500000 – 809999)</h4>
+        <table>
+          <thead><tr><th>Account</th><th>Name</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="code">500100</td><td>Cost of Services</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">510100</td><td>Subcontractor Costs</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">600100</td><td>Salaries &amp; Wages</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">600200</td><td>Social Contributions</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">600300</td><td>Pension Costs</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">610100</td><td>Rent &amp; Facilities</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">620100</td><td>Travel &amp; Entertainment</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">630100</td><td>IT &amp; Communications</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">640100</td><td>Office Supplies</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">650100</td><td>Marketing &amp; Advertising</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">700100</td><td>Depreciation Expense</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">710100</td><td>Financial Expenses</td><td>Profit and Loss</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>FX &amp; Total Accounts</h4>
+        <table>
+          <thead><tr><th>Account</th><th>Name</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="code">801000</td><td>Realized FX Gain</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">802000</td><td>Realized FX Loss</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">803000</td><td>Unrealized FX Gain</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">804000</td><td>Unrealized FX Loss</td><td>Profit and Loss</td></tr>
+            <tr><td class="code">900000</td><td>Total Assets</td><td>Total</td></tr>
+            <tr><td class="code">910000</td><td>Total Liabilities</td><td>Total</td></tr>
+            <tr><td class="code">920000</td><td>Total Revenue</td><td>Total</td></tr>
+            <tr><td class="code">930000</td><td>Total Expenses</td><td>Total</td></tr>
+            <tr><td class="code">999999</td><td>Grand Total</td><td>Total</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Phase 3 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">3</span>
+      <span class="phase-title">General Ledger Configuration</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <div class="subsection">
+        <h4>Ledger Setup</h4>
+        <dl class="kv">
+          <dt>Chart of Accounts</dt><dd class="code">Danish</dd>
+          <dt>Accounting Currency</dt><dd class="code">DKK</dd>
+          <dt>Fiscal Calendar</dt><dd class="code">Fiscal</dd>
+          <dt>Account Structure 1</dt><dd class="code">Service Industries B/S</dd>
+          <dt>Account Structure 2</dt><dd class="code">Service Industries P&amp;L</dd>
+          <dt>Realized FX Gain</dt><dd class="code">801000</dd>
+          <dt>Realized FX Loss</dt><dd class="code">802000</dd>
+          <dt>Unrealized FX Gain</dt><dd class="code">803000</dd>
+          <dt>Unrealized FX Loss</dt><dd class="code">804000</dd>
+        </dl>
+      </div>
+      <div class="subsection">
+        <h4>GL Parameters</h4>
+        <dl class="kv">
+          <dt>Penny Difference</dt><dd>0,01 DKK</dd>
+          <dt>VAT Rules</dt><dd>EU-style (Amounts include sales tax = Yes)</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Phase 4 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">4</span>
+      <span class="phase-title">Tax Configuration</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <div class="subsection">
+        <h4>Tax Authority</h4>
+        <dl class="kv">
+          <dt>Authority</dt><dd class="code">SKAT</dd>
+          <dt>Name</dt><dd>Danish Tax Authority (Skattestyrelsen)</dd>
+          <dt>Country</dt><dd>DNK</dd>
+          <dt>Rounding</dt><dd>0,01 — Ordinary</dd>
+        </dl>
+      </div>
+
+      <div class="subsection">
+        <h4>Posting Group</h4>
+        <table>
+          <thead><tr><th>Group</th><th>Payable</th><th>Receivable</th><th>Settlement</th></tr></thead>
+          <tbody>
+            <tr><td class="code">DK_VAT</td><td class="code">212000</td><td class="code">211000</td><td class="code">213000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Settlement Period</h4>
+        <dl class="kv">
+          <dt>Period ID</dt><dd class="code">DK_MTH</dd>
+          <dt>Description</dt><dd>Danish VAT Monthly</dd>
+          <dt>Authority</dt><dd class="code">SKAT</dd>
+          <dt>Intervals</dt><dd>24 months (Jan 2025 – Dec 2026)</dd>
+        </dl>
+      </div>
+
+      <div class="subsection">
+        <h4>Tax Codes</h4>
+        <table>
+          <thead><tr><th>Code</th><th>Description</th><th>Rate</th><th>Currency</th><th>Type</th><th>Country Type</th></tr></thead>
+          <tbody>
+            <tr><td class="code">VAT25</td><td>Danish VAT 25%</td><td>25.00%</td><td>DKK</td><td>VAT</td><td>Domestic</td></tr>
+            <tr><td class="code">VAT0</td><td>Zero-rated VAT</td><td>0.00%</td><td>DKK</td><td>VAT Zero</td><td>Domestic</td></tr>
+            <tr><td class="code">VATEU</td><td>EU Reverse Charge VAT 25%</td><td>25.00%</td><td>DKK</td><td>VAT</td><td>EU</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Tax Groups (Sales Tax Groups)</h4>
+        <table>
+          <thead><tr><th>Group</th><th>Description</th><th>Tax Codes</th></tr></thead>
+          <tbody>
+            <tr><td class="code">DK_DOM</td><td>Danish Domestic</td><td class="code">VAT25</td></tr>
+            <tr><td class="code">DK_EU</td><td>EU Trade</td><td class="code">VATEU</td></tr>
+            <tr><td class="code">DK_EXP</td><td>Export Zero-rated</td><td class="code">VAT0 (exempt)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Item Tax Groups</h4>
+        <table>
+          <thead><tr><th>Group</th><th>Description</th><th>Tax Code</th></tr></thead>
+          <tbody>
+            <tr><td class="code">FULL</td><td>Standard VAT 25%</td><td class="code">VAT25</td></tr>
+            <tr><td class="code">ZERO</td><td>Zero-rated</td><td class="code">VAT0 (exempt)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Phase 5 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">5</span>
+      <span class="phase-title">Accounts Receivable</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <div class="subsection">
+        <h4>Customer Groups</h4>
+        <table>
+          <thead><tr><th>Group</th><th>Description</th><th>Default Tax Group</th></tr></thead>
+          <tbody>
+            <tr><td class="code">DOM</td><td>Domestic Customers</td><td class="code">DK_DOM</td></tr>
+            <tr><td class="code">EU</td><td>EU Customers</td><td class="code">DK_EU</td></tr>
+            <tr><td class="code">EXP</td><td>Export Customers</td><td class="code">DK_EXP</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Payment Terms</h4>
+        <table>
+          <thead><tr><th>Code</th><th>Description</th><th>Days</th><th>Method</th></tr></thead>
+          <tbody>
+            <tr><td class="code">Net14</td><td>Net 14 days</td><td>14</td><td>Net</td></tr>
+            <tr><td class="code">Net30</td><td>Net 30 days</td><td>30</td><td>Net</td></tr>
+            <tr><td class="code">COD</td><td>Cash on Delivery</td><td>0</td><td>COD</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Posting Profile</h4>
+        <table>
+          <thead><tr><th>Profile</th><th>Scope</th><th>Summary Account</th></tr></thead>
+          <tbody>
+            <tr><td class="code">GEN</td><td>All customers</td><td class="code">130100</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>AR Parameters</h4>
+        <dl class="kv">
+          <dt>Default Posting Profile</dt><dd class="code">GEN</dd>
+          <dt>Default Tax Group</dt><dd class="code">DK_DOM</dd>
+          <dt>Default Item Tax Group</dt><dd class="code">FULL</dd>
+          <dt>Credit Note as Correction</dt><dd>Yes</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Phase 6 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">6</span>
+      <span class="phase-title">Accounts Payable</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <div class="subsection">
+        <h4>Vendor Groups</h4>
+        <table>
+          <thead><tr><th>Group</th><th>Description</th><th>Default Tax Group</th></tr></thead>
+          <tbody>
+            <tr><td class="code">DOM</td><td>Domestic Vendors</td><td class="code">DK_DOM</td></tr>
+            <tr><td class="code">EU</td><td>EU Vendors</td><td class="code">DK_EU</td></tr>
+            <tr><td class="code">EXP</td><td>Foreign Vendors</td><td class="code">DK_EXP</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Posting Profile</h4>
+        <table>
+          <thead><tr><th>Profile</th><th>Scope</th><th>Summary Account</th></tr></thead>
+          <tbody>
+            <tr><td class="code">GEN</td><td>All vendors</td><td class="code">200100</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Vendor Payment Methods</h4>
+        <table>
+          <thead><tr><th>Method</th><th>Description</th><th>Account Type</th><th>Payment Type</th></tr></thead>
+          <tbody>
+            <tr><td class="code">BANK</td><td>Bank transfer</td><td>Bank</td><td>Electronic Payment</td></tr>
+            <tr><td class="code">CASH</td><td>Cash payment</td><td>Ledger</td><td>Other</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>AP Parameters</h4>
+        <dl class="kv">
+          <dt>Default Posting Profile</dt><dd class="code">GEN</dd>
+          <dt>Default Tax Group</dt><dd class="code">DK_DOM</dd>
+          <dt>Default Item Tax Group</dt><dd class="code">FULL</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Phase 7 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">7</span>
+      <span class="phase-title">Number Sequences &amp; Journal Names</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <div class="subsection">
+        <h4>Number Sequences</h4>
+        <table>
+          <thead><tr><th>Code</th><th>Name</th><th>Format</th><th>Range</th></tr></thead>
+          <tbody>
+            <tr><td class="code">GenJrn</td><td>General journal voucher</td><td class="code">GLRC-######</td><td>1 – 999 999</td></tr>
+            <tr><td class="code">CustPay</td><td>Customer payment voucher</td><td class="code">CPRC-######</td><td>1 – 999 999</td></tr>
+            <tr><td class="code">VendPay</td><td>Vendor payment voucher</td><td class="code">VPRC-######</td><td>1 – 999 999</td></tr>
+            <tr><td class="code">VendInv</td><td>Vendor invoice journal voucher</td><td class="code">VIRC-######</td><td>1 – 999 999</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h4>Journal Names</h4>
+        <table>
+          <thead><tr><th>Name</th><th>Description</th><th>Type</th><th>Voucher Series</th></tr></thead>
+          <tbody>
+            <tr><td class="code">GenJrn</td><td>General journal</td><td>Daily</td><td class="code">GenJrn</td></tr>
+            <tr><td class="code">CustPay</td><td>Customer payment journal</td><td>Customer Payment</td><td class="code">CustPay</td></tr>
+            <tr><td class="code">VendPay</td><td>Vendor payment journal</td><td>Vendor Payment</td><td class="code">VendPay</td></tr>
+            <tr><td class="code">VendInv</td><td>Vendor invoice journal</td><td>Invoice Register</td><td class="code">VendInv</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Phase 8 ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="phase-number">8</span>
+      <span class="phase-title">Danish Localization</span>
+      <span class="phase-badge">✓ Complete</span>
+    </div>
+    <div class="phase-body">
+      <div class="subsection">
+        <h4>VAT Registration</h4>
+        <dl class="kv">
+          <dt>Registration Type</dt><dd class="code">VAT ID</dd>
+          <dt>Legislation Type</dt><dd>EU VAT ID</dd>
+          <dt>Country</dt><dd>DNK</dd>
+          <dt>Format</dt><dd class="code">DK########</dd>
+          <dt>Registration Number</dt><dd class="code">DK99999999</dd>
+          <dt>Effective</dt><dd>2025-01-01</dd>
+        </dl>
+      </div>
+
+      <div class="note">
+        <strong>⚠ Note:</strong> The VAT number <code>DK99999999</code> is a placeholder. Replace with the actual Danish CVR/SE number when available. Intrastat commodity codes and EU Sales List detailed configuration can be added when trade operations begin.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Summary ─── -->
+  <div class="phase">
+    <div class="phase-header" onclick="this.parentElement.classList.toggle('collapsed')" style="background: #e6f4ea;">
+      <span class="phase-number" style="background: var(--success);">✓</span>
+      <span class="phase-title">Configuration Summary</span>
+    </div>
+    <div class="phase-body">
+      <table>
+        <thead><tr><th>Category</th><th>Items Created</th><th>Key Identifiers</th></tr></thead>
+        <tbody>
+          <tr><td>Legal Entity</td><td>1 updated</td><td class="code">LARC</td></tr>
+          <tr><td>Chart of Accounts</td><td>1 CoA + 43 accounts</td><td class="code">Danish</td></tr>
+          <tr><td>Ledger</td><td>1 configured</td><td>DKK, 2 account structures</td></tr>
+          <tr><td>Tax Authority</td><td>1</td><td class="code">SKAT</td></tr>
+          <tr><td>Tax Posting Groups</td><td>1</td><td class="code">DK_VAT</td></tr>
+          <tr><td>Settlement Periods</td><td>1 header + 24 intervals</td><td class="code">DK_MTH</td></tr>
+          <tr><td>Tax Codes</td><td>3 codes + 3 rate records</td><td class="code">VAT25, VAT0, VATEU</td></tr>
+          <tr><td>Tax Groups</td><td>3</td><td class="code">DK_DOM, DK_EU, DK_EXP</td></tr>
+          <tr><td>Item Tax Groups</td><td>2</td><td class="code">FULL, ZERO</td></tr>
+          <tr><td>Customer Groups</td><td>3</td><td class="code">DOM, EU, EXP</td></tr>
+          <tr><td>Payment Terms</td><td>3</td><td class="code">Net14, Net30, COD</td></tr>
+          <tr><td>Customer Posting Profile</td><td>1 header + 1 line</td><td class="code">GEN → 130100</td></tr>
+          <tr><td>Vendor Groups</td><td>3</td><td class="code">DOM, EU, EXP</td></tr>
+          <tr><td>Vendor Posting Profile</td><td>1 header + 1 line</td><td class="code">GEN → 200100</td></tr>
+          <tr><td>Vendor Payment Methods</td><td>2</td><td class="code">BANK, CASH</td></tr>
+          <tr><td>Number Sequences</td><td>4</td><td class="code">GenJrn, CustPay, VendPay, VendInv</td></tr>
+          <tr><td>Journal Names</td><td>4</td><td class="code">GenJrn, CustPay, VendPay, VendInv</td></tr>
+          <tr><td>VAT Registration</td><td>1 type + 1 number</td><td class="code">DK99999999</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Expand/collapse is handled by onclick on .phase-header
+</script>
+
+</body>
+</html>
