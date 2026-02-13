@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"sca-dev-lbl-2 mcp": {
+			"url": "https://sca-dev-lbl-2.operations.eu.dynamics.com/mcp",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}
